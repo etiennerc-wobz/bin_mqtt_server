@@ -9,8 +9,14 @@ const port = 3000;
 const host = 'localhost';
 
 // Configurer le broker MQTT
-const mqttBrokerUrl = 'mqtt://localhost:1883'; // Remplace par ton broker MQTT
-const mqttClient = mqtt.connect(mqttBrokerUrl);
+const options = {
+  host: 'env-6680648.rag-cloud.hosteur.com',  // Remplacez par l'adresse de votre broker
+  port: 1883,                // Port par défaut pour MQTT non sécurisé
+  username: 'iot_magic',  // Remplacez par votre username
+  password: 'lRJVjo8DjGjP4zO',  // Remplacez par votre password
+};
+
+const mqttClient = mqtt.connect(options);
 
 // Sujet MQTT pour la publication et l'abonnement
 const subscribeTopic = 'bin/state/';
