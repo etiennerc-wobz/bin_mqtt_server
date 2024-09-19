@@ -1,0 +1,71 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dossiers spécifiques au système d'exploitation ou éditeur
+.DS_Store
+Thumbs.db
+
+# Log files
+logs/
+*.log
+*.log.*
+
+# Fichiers de compilation
+dist/
+build/
+
+# Fichiers de packages
+*.tgz
+*.zip
+
+# Dossiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Dossiers de test
+coverage/
+.jest/
+
+# Fichiers de production
+.nyc_output/
+.sass-cache/
+
+# Fichiers de cache
+.cache/
+.cache-loader/
+.parcel-cache/
+
+# Fichiers de verrous (lock)
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Répertoires de déploiement
+.vscode/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers de débogage
+*.swp
+*.swo
+
+# Fichiers de configuration temporaire
+*.bak
+*.tmp
+
+# TypeScript
+*.tsbuildinfo
+
+# Autres fichiers spécifiques à des services
+.heroku/
