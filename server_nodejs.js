@@ -5,7 +5,7 @@ const path = require('path');
 
 // Initialiser l'application Express
 const app = express();
-const port = 3000;
+const port = 3123;
 const host = 'localhost';
 
 // Configurer le broker MQTT
@@ -19,15 +19,22 @@ const options = {
 const mqttClient = mqtt.connect(options);
 
 // Sujet MQTT pour la publication et l'abonnement
-const subscribeTopic = 'bin/state/';
-const publishTopic = 'bin/action/';
+const subscribeTopicBin1 = 'bin/state/magic_bin_1';
+const publishTopicBin1 = 'bin/action/magic_bin_1';
+
+const subscribeTopicBin2 = 'bin/state/magic_bin_2';
+const publishTopicBin2 = 'bin/action/magic_bin_2';
 
 // Variables pour stocker le message reçu
-let receivedMessage = '';
-
 let messages = {
+  bin1: {
     limit: null,
-    current: null,
+    current: null
+  },
+  bin2: {
+    limit: null,
+    current: null
+  }
 };
 
 // Configuration de l'application pour servir des fichiers statiques et parser les requêtes POST
@@ -40,45 +47,73 @@ app.get('/', (req, res) => {
 });
 
 // Route pour récupérer les messages MQTT actuels
-app.get('/api/messages', (req, res) => {
-    res.json(messages);
+app.get('/api/messages/bin1', (req, res) => {
+    res.json(messages.bin1);
+});
+
+app.get('/api/messages/bin2', (req, res) => {
+  res.json(messages.bin2);
 });
 
 // Route pour publier des messages MQTT depuis le formulaire de la page web
-app.post('/reset', (req, res) => {
-    const message = req.body.message;
-    const mqttMEssage = {
-        cmd: "reset",
-        value : null
-        };
-    const jsonString = JSON.stringify(mqttMEssage);
-    mqttClient.publish(publishTopic, jsonString, () => {
-        console.log(`Message publié sur ${publishTopic}: ${jsonString}`);
-    });
-    res.redirect('/');
+app.post('/reset/bin1', (req, res) => {
+  const mqttMessage = {
+    cmd: "reset",
+    value : null
+  };
+  const jsonString = JSON.stringify(mqttMessage);
+  mqttClient.publish(publishTopicBin1, jsonString, () => {
+    console.log(`Message publié sur ${publishTopicBin1}: ${jsonString}`);
+  });
+  res.redirect('/');
 });
 
-app.post('/publish_limit', (req, res) => {
-    const message = req.body.message;
-    const mqttMEssage = {
-        cmd: "set_capacity",
-        value : message
-    };
-    const jsonString = JSON.stringify(mqttMEssage);
-    mqttClient.publish(publishTopic, jsonString, () => {
-      console.log(`Message publié sur ${publishTopic}: ${jsonString}`);
-    });
-    res.redirect('/');
+app.post('/reset/bin2', (req, res) => {
+  const mqttMessage = {
+    cmd: "reset",
+    value : null
+  };
+  const jsonString = JSON.stringify(mqttMessage);
+  mqttClient.publish(publishTopicBin2, jsonString, () => {
+    console.log(`Message publié sur ${publishTopicBin2}: ${jsonString}`);
   });
+  res.redirect('/');
+});
+
+app.post('/publish_limit/bin1', (req, res) => {
+  const message = req.body.message;
+  const mqttMessage = {
+    cmd: "set_capacity",
+    value : message
+  };
+  const jsonString = JSON.stringify(mqttMessage);
+  mqttClient.publish(publishTopicBin1, jsonString, () => {
+    console.log(`Message publié sur ${publishTopicBin1}: ${jsonString}`);
+  });
+  res.redirect('/');
+});
+
+app.post('/publish_limit/bin2', (req, res) => {
+  const message = req.body.message;
+  const mqttMessage = {
+    cmd: "set_capacity",
+    value : message
+  };
+  const jsonString = JSON.stringify(mqttMessage);
+  mqttClient.publish(publishTopicBin2, jsonString, () => {
+    console.log(`Message publié sur ${publishTopicBin2}: ${jsonString}`);
+  });
+  res.redirect('/');
+});
 
 // Se connecter au broker MQTT
 mqttClient.on('connect', () => {
   console.log('Connecté au broker MQTT');
-  mqttClient.subscribe(subscribeTopic, (err) => {
+  mqttClient.subscribe([subscribeTopicBin1,subscribeTopicBin2], (err) => {
     if (err) {
-      console.error(`Erreur lors de l'abonnement au sujet ${subscribeTopic}:`, err);
+      console.error(`Erreur lors de l'abonnement au sujet :`, err);
     } else {
-      console.log(`Abonné au sujet ${subscribeTopic}`);
+      console.log(`Abonné au sujet ${subscribeTopicBin1} et ${subscribeTopicBin2}`);
     }
   });
 });
@@ -90,11 +125,15 @@ mqttClient.on('message', (topic, message) => {
     try {
         const jsonMessage = JSON.parse(message.toString());
         // Mettre à jour le message reçu dans la variable
-        if (topic === subscribeTopic) {
-            messages.current = jsonMessage.current;
-            messages.limit = jsonMessage.limit;
-        }
-        console.log(`messages : ${messages.current} ${messages.limit}`);
+        if (topic === subscribeTopicBin1) {
+            messages.bin1.current = jsonMessage.current;
+            messages.bin1.limit = jsonMessage.limit;
+            console.log(`Messages Bin 1: current=${messages.bin1.current}, limit=${messages.bin1.limit}`);
+        } else if (topic === subscribeTopicBin2) {
+          messages.bin2.current = jsonMessage.current;
+          messages.bin2.limit = jsonMessage.limit;
+          console.log(`Messages Bin 2: current=${messages.bin2.current}, limit=${messages.bin2.limit}`);
+      }
     } catch (error) {
         console.error(`Erreur de parsing JSON pour le topic ${topic}:`, error);
     }

@@ -5,34 +5,86 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bin Operation Interface</title>
-    <script>
-        function fetchMessages() {
-            fetch('/api/messages')
-            .then(response => response.json())
-                .then(data => {
-                    document.getElementById('current-value').textContent = data.current !== null ? data.current : '-';
-                    document.getElementById('limit-value').textContent = data.limit !== null ? data.limit : '-';
-                })
-                .catch(error => console.error('Erreur lors de la récupération des messages MQTT:', error));
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
         }
-        // Mettre à jour les messages toutes les 2 secondes
-        setInterval(fetchMessages, 2000);
+        h1 {
+            margin-bottom: 20px;
+        }
+        .container-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Espace entre les deux conteneurs */
+        }
+        .container {
+            border: 2px solid #000;
+            padding: 20px;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function fetchMessages(binId) {
+            fetch(`/api/messages/${binId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById(`current-value-${binId}`).textContent = data.current !== null ? data.current : '-';
+                document.getElementById(`limit-value-${binId}`).textContent = data.limit !== null ? data.limit : '-';
+            })
+            .catch(error => console.error(`Erreur lors de la récupération des messages MQTT pour ${binId}:`, error));
+        }
+        setInterval(() => {
+            fetchMessages('bin1');
+            fetchMessages('bin2');
+        }, 2000);
     </script>
 
 </head>
 <body>
-
-    <h1>Bin Operation Web Interface</h1>&
-    <p><strong>Limite:</strong> <span id="limit-value">Chargement...</span></p>
-    <p><strong>Quantité collectée:</strong> <span id="current-value">Chargement...</span></p>
-    <p><strong>Modifier limite:</strong></p>
-    <form action="/publish_limit" method="post">
-        <input type="text" name="message" placeholder="Entrez un nombre">
-        <button type="submit">Envoyer</button>
-    </form>
-    <p><strong>Opération:</strong></p>
-    <form action="/reset" method="post">
-        <button type="submit">Reset</button>
-    </form>
+    <h1>Bin Operation Web Interface</h1>
+    <div class="container-wrapper">
+        <div class="container">
+            <h2>Magic Bin 1</h2>
+            <p><strong>Limite:</strong> <span id="limit-value-bin1">Chargement...</span></p>
+            <p><strong>Quantité collectée:</strong> <span id="current-value-bin1">Chargement...</span></p>
+            <p><strong>Modifier limite:</strong></p>
+            <form action="/publish_limit/bin1" method="post">
+                <input type="text" name="message" placeholder="Entrez un nombre">
+                <button type="submit">Envoyer</button>
+            </form>
+            <p><strong>Opération:</strong></p>
+            <form action="/reset/bin1" method="post">
+                <button type="submit">Reset</button>
+            </form>
+        </div>
+        <div class="container">
+            <h2>Magic Bin 2</h2>
+            <p><strong>Limite:</strong> <span id="limit-value-bin2">Chargement...</span></p>
+            <p><strong>Quantité collectée:</strong> <span id="current-value-bin2">Chargement...</span></p>
+            <p><strong>Modifier limite:</strong></p>
+            <form action="/publish_limit/bin2" method="post">
+                <input type="text" name="message" placeholder="Entrez un nombre">
+                <button type="submit">Envoyer</button>
+            </form>
+            <p><strong>Opération:</strong></p>
+            <form action="/reset/bin2" method="post">
+                <button type="submit">Reset</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
